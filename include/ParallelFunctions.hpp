@@ -3,7 +3,6 @@
 #define PARFUNC_69BCD083
 
 #include <omp.h>
-#include <functional>
 
 using namespace std;
 
@@ -53,13 +52,12 @@ T* copy_array(T* array, long long length) {
     return copy;
 }
 
-
 template<typename T>
 T* linear_transform_array(T* array, long long length, T scale, T step) {
 #pragma omp parallel for
     for (int i = 0; i < length; i++)
         array[i] = scale * array[i] + step;
-    return copy;
+    return array;
 }
 
 
