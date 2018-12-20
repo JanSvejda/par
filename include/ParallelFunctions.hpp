@@ -3,6 +3,7 @@
 #define PARFUNC_69BCD083
 
 #include <omp.h>
+#include <iostream>
 
 using namespace std;
 
@@ -71,6 +72,20 @@ T** init_matrix(T** matrix, long long dims[], T& value) {
 }
 
 template<typename T>
+T** init_matrix(long long dims[], T value) {
+    long long d1 = dims[0], d2 = dims[1];
+    T ** matrix = new T*[d1];
+    #pragma omp parallel for
+    for (int i = 0; i < d1; ++i){
+        matrix[i] = new T[d2];
+        #pragma omp parallel for
+        for (int j = 0; j < d2; ++j)
+            matrix[i][j] = value;
+    }
+    return matrix;
+}
+
+template<typename T>
 T** copy_matrix(T** matrix, long long dims[]) {
     long long d1 = dims[0], d2 = dims[1];
     T** copy = new T[d1];
@@ -94,6 +109,54 @@ T** map_matrix(T** matrix, long long dims[], F lambda) {
     return matrix;
 }
 
+template<typename T>
+void print_matrix(T** m, long long dims[]) {
+    long long d1 = dims[0], d2 = dims[1];
+    for (int i = 0; i < d1; ++i){
+        for (int j = 0; j < d2; ++j)
+            cout << m[i][j] << " ";
+        cout << endl;
+    }
 
+}
+
+
+template<typename T, typename F>
+T** wave_matrix(T** matrix, long long N, F lambda) {
+    long long x, y;
+    long long dims[2] = {N, N};
+
+    for (long long i = 1; i < N; ++i){ // i is the i-th wave
+        #pragma omp parallel for private(x,y)
+        for (y = 1; y <= i; ++y){
+            x = i+1 - y;
+            matrix[x][y] = lambda(matrix[x-1][y], matrix[x][y-1], matrix[x][y]);
+        }
+        // barrier
+        print_matrix(matrix, dims);
+        cout << "=============================================" << endl;
+    }
+
+    for (long long i = 2; i < N; ++i){
+        #pragma omp parallel for private(x,y)
+        for (y = i; y < N; ++y) {
+            x = N-1+i - y;
+            matrix[x][y] = lambda(matrix[x-1][y], matrix[x][y-1], matrix[x][y]);
+        }
+        // barrier
+        print_matrix(matrix, dims);
+        cout << "=============================================" << endl;
+    }
+
+}
+
+template<typename T>
+void destroy_matrix(T** m, long long dims[]) {
+    long long d1 = dims[0], d2 = dims[1];
+
+    for (int i = 0; i < d1; ++i)
+        delete [] m[i];
+    delete [] m;
+}
 
 #endif
