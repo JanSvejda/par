@@ -113,8 +113,11 @@ template<typename T>
 void print_matrix(T** m, long long dims[]) {
     long long d1 = dims[0], d2 = dims[1];
     for (int i = 0; i < d1; ++i){
-        for (int j = 0; j < d2; ++j)
-            cout << m[i][j] << " ";
+        i == 0 ? cout << "/ " : i == d1-1 ? cout << "\\ " : cout << "| ";
+        for (int j = 0; j < d2; ++j){
+            j == d2 - 1 ? cout << m[i][j] : cout << m[i][j] << ", ";
+        }
+        i == 0 ? cout << " \\" : i == d1-1 ? cout << " /" : cout << " |";
         cout << endl;
     }
 
@@ -133,8 +136,8 @@ T** wave_matrix(T** matrix, long long N, F lambda) {
             matrix[x][y] = lambda(matrix[x-1][y], matrix[x][y-1], matrix[x][y]);
         }
         // barrier
-        print_matrix(matrix, dims);
-        cout << "=============================================" << endl;
+        // print_matrix(matrix, dims);
+        // cout << "=============================================" << endl;
     }
 
     for (long long i = 2; i < N; ++i){
@@ -144,10 +147,9 @@ T** wave_matrix(T** matrix, long long N, F lambda) {
             matrix[x][y] = lambda(matrix[x-1][y], matrix[x][y-1], matrix[x][y]);
         }
         // barrier
-        print_matrix(matrix, dims);
-        cout << "=============================================" << endl;
+        // print_matrix(matrix, dims);
+        // cout << "=============================================" << endl;
     }
-
 }
 
 template<typename T>
@@ -157,6 +159,21 @@ void destroy_matrix(T** m, long long dims[]) {
     for (int i = 0; i < d1; ++i)
         delete [] m[i];
     delete [] m;
+}
+
+template<typename P1, typename P2>
+void fork(P1 program1, P2 program2) {
+#pragma omp parallel sections
+    {
+#pragma omp section
+        {
+            program1();
+        }
+#pragma omp section
+        {
+            program2();
+        }
+    }
 }
 
 #endif

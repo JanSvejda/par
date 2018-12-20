@@ -1,3 +1,3 @@
-#include "ParallelFunctions.hpp"
+#include "par.h"
 
 
