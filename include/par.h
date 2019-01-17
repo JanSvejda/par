@@ -11,7 +11,7 @@ template<typename T>
 T* init_vector(long long length, T value) {
     T* vector = new T[length];
     #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
+    for (long long i = 0; i < length; ++i)
         vector[i] = value;
     return vector;
 }
@@ -20,7 +20,7 @@ template<typename T, typename InitF>
 T* init_vector_l(long long length, InitF lambda) {
     T* vector = new T[length];
 #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
+    for (long long i = 0; i < length; ++i)
         vector[i] = lambda(i);
     return vector;
 }
@@ -29,7 +29,7 @@ T* init_vector_l(long long length, InitF lambda) {
 template<typename T, typename F>
 T* map_vector(T* vector, long long length, F lambda) {
     #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
+    for (long long i = 0; i < length; ++i)
         vector[i] = lambda(vector[i]);
 
     return vector;
@@ -43,7 +43,7 @@ T reduce_vector(T* vector, long long length, F lambda, T neutral) {
         T priv_part = neutral;
 
         #pragma omp for
-        for (int i = 0; i < length; ++i){
+        for (long long i = 0; i < length; ++i){
             priv_part = lambda(priv_part, vector[i]);
         }
 
@@ -59,7 +59,7 @@ template<typename T>
 T* copy_vector(T* vector, long long length) {
     T* copy = new T[length];
 #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
+    for (long long i = 0; i < length; ++i)
         copy[i] = vector[i];
     return copy;
 }
@@ -67,7 +67,7 @@ T* copy_vector(T* vector, long long length) {
 template<typename T>
 T* linear_transform_vector(T* vector, long long length, T scale, T step) {
 #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
+    for (long long i = 0; i < length; ++i)
         vector[i] = scale * vector[i] + step;
     return vector;
 }
@@ -76,8 +76,8 @@ template<typename T>
 T** init_matrix(T** matrix, long long dims[], T& value) {
     long long d1 = dims[0], d2 = dims[1];
 #pragma omp parallel for collapse(2)
-    for (int i = 0; i < d1; ++i)
-        for (int j = 0; j < d2; ++j)
+    for (long long i = 0; i < d1; ++i)
+        for (long long j = 0; j < d2; ++j)
             matrix[i][j] = value;
     return matrix;
 }
@@ -87,7 +87,7 @@ T** init_matrix(long long dims[], T* vector) {
     long long d1 = dims[0], d2 = dims[1];
     T ** matrix = new T*[d1];
 #pragma omp parallel for
-    for (int i = 0; i < d1; ++i){
+    for (long long i = 0; i < d1; ++i){
         matrix[i] = copy_vector(vector, d2);
     }
     return matrix;
@@ -98,10 +98,10 @@ T** init_matrix(long long dims[], T value) {
     long long d1 = dims[0], d2 = dims[1];
     T ** matrix = new T*[d1];
     #pragma omp parallel for
-    for (int i = 0; i < d1; ++i){
+    for (long long i = 0; i < d1; ++i){
         matrix[i] = new T[d2];
         #pragma omp parallel for
-        for (int j = 0; j < d2; ++j)
+        for (long long j = 0; j < d2; ++j)
             matrix[i][j] = value;
     }
     return matrix;
@@ -112,9 +112,9 @@ T** copy_matrix(T** matrix, long long dims[]) {
     long long d1 = dims[0], d2 = dims[1];
     T** copy = new T[d1];
 #pragma omp parallel for
-    for (int i = 0; i < d1; ++i) {
+    for (long long i = 0; i < d1; ++i) {
         copy[i] = new T[d2];
-        for (int j = 0; j < d2; ++j)
+        for (long long j = 0; j < d2; ++j)
             copy[i][j] = matrix[i][j];
     }
     return copy;
@@ -124,8 +124,8 @@ template<typename T, typename F>
 T** map_matrix(T** matrix, long long dims[], F lambda) {
     long long d1 = dims[0], d2 = dims[1];
 #pragma omp parallel for collapse(2)
-    for (int i = 0; i < d1; ++i)
-        for (int j = 0; j < d2; ++j)
+    for (long long i = 0; i < d1; ++i)
+        for (long long j = 0; j < d2; ++j)
             matrix[i][j] = lambda(matrix[i][j]);
 
     return matrix;
@@ -134,9 +134,9 @@ T** map_matrix(T** matrix, long long dims[], F lambda) {
 template<typename T>
 void print_matrix(T** m, long long dims[]) {
     long long d1 = dims[0], d2 = dims[1];
-    for (int i = 0; i < d1; ++i){
+    for (long long i = 0; i < d1; ++i){
         i == 0 ? cout << "/ " : i == d1-1 ? cout << "\\ " : cout << "| ";
-        for (int j = 0; j < d2; ++j){
+        for (long long j = 0; j < d2; ++j){
             j == d2 - 1 ? cout << m[i][j] : cout << m[i][j] << ", ";
         }
         i == 0 ? cout << " \\" : i == d1-1 ? cout << " /" : cout << " |";
@@ -178,7 +178,7 @@ template<typename T>
 void destroy_matrix(T** m, long long dims[]) {
     long long d1 = dims[0], d2 = dims[1];
 
-    for (int i = 0; i < d1; ++i)
+    for (long long i = 0; i < d1; ++i)
         delete [] m[i];
     delete [] m;
 }
