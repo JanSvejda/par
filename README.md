@@ -10,7 +10,7 @@ cmake ..
 sudo make install
 ```
 
-This will install two things on your system: /usr/local/lib/libpar.a and /usr/local/include/par.h
+This will install two things on your system: `/usr/local/lib/libpar.a` and `/usr/local/include/par.h`
 
 # Usage
 After you have installed the library, you can include it in your C++ project (`#include <par.h>`).
