@@ -1,5 +1,5 @@
 # Par
-A collection of parallel OpenMP functions.
+A collection of parallel OpenMP utility functions for vectors and matrices in C++.
 
 # Installation
 Go to the root of the project's directory and execute the following:
