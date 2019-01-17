@@ -27,12 +27,10 @@ T* init_vector_l(long long length, InitF lambda) {
 
 
 template<typename T, typename F>
-T* map_vector(T* vector, long long length, F lambda) {
+void map_vector(T* vector, long long length, F lambda) {
     #pragma omp parallel for
     for (long long i = 0; i < length; ++i)
         vector[i] = lambda(vector[i]);
-
-    return vector;
 }
 
 template<typename T, typename F>
@@ -65,11 +63,10 @@ T* copy_vector(T* vector, long long length) {
 }
 
 template<typename T>
-T* linear_transform_vector(T* vector, long long length, T scale, T step) {
+void linear_transform_vector(T* vector, long long length, T scale, T step) {
 #pragma omp parallel for
     for (long long i = 0; i < length; ++i)
         vector[i] = scale * vector[i] + step;
-    return vector;
 }
 
 template<typename T>
