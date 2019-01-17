@@ -26,9 +26,9 @@ install(TARGETS par
     )
 
 
-  ######### Tests ##########
-  set(CXXTEST_INCLUDE_DIR /opt/cxxtestgen)
-  set(CXXTEST_PYTHON_TESTGEN_EXECUTABLE /opt/cxxtestgen/bin/cxxtestgen)
+######### Tests ##########
+set(CXXTEST_INCLUDE_DIR /opt/cxxtestgen)
+set(CXXTEST_PYTHON_TESTGEN_EXECUTABLE /opt/cxxtestgen/bin/cxxtestgen)
 find_package(CxxTest)
 if(CXXTEST_FOUND)
     include_directories(${CXXTEST_INCLUDE_DIR})
