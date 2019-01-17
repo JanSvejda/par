@@ -8,24 +8,35 @@
 using namespace std;
 
 template<typename T>
-T* init_array(T* array, long long length, T value) {
+T* init_vector(long long length, T value) {
+    T* vector = new T[length];
     #pragma omp parallel for
     for (int i = 0; i < length; ++i)
-        array[i] = value;
-    return array;
+        vector[i] = value;
+    return vector;
+}
+
+template<typename T, typename InitF>
+T* init_vector_l(long long length, InitF lambda) {
+    T* vector = new T[length];
+#pragma omp parallel for
+    for (int i = 0; i < length; ++i)
+        vector[i] = lambda(i);
+    return vector;
+}
+
+
+template<typename T, typename F>
+T* map_vector(T* vector, long long length, F lambda) {
+    #pragma omp parallel for
+    for (int i = 0; i < length; ++i)
+        vector[i] = lambda(vector[i]);
+
+    return vector;
 }
 
 template<typename T, typename F>
-T* map_array(T* array, long long length, F lambda) {
-    #pragma omp parallel for
-    for (int i = 0; i < length; ++i)
-        array[i] = lambda(array[i]);
-
-    return array;
-}
-
-template<typename T, typename F>
-T reduce_array(T* array, long long length, F lambda, T neutral) {
+T reduce_vector(T* vector, long long length, F lambda, T neutral) {
     T reduction = neutral;
 #pragma omp parallel
     {
@@ -33,7 +44,7 @@ T reduce_array(T* array, long long length, F lambda, T neutral) {
 
         #pragma omp for
         for (int i = 0; i < length; ++i){
-            priv_part = lambda(priv_part, array[i]);
+            priv_part = lambda(priv_part, vector[i]);
         }
 
         #pragma omp critical
@@ -45,20 +56,20 @@ T reduce_array(T* array, long long length, F lambda, T neutral) {
 }
 
 template<typename T>
-T* copy_array(T* array, long long length) {
+T* copy_vector(T* vector, long long length) {
     T* copy = new T[length];
 #pragma omp parallel for
     for (int i = 0; i < length; ++i)
-        copy[i] = array[i];
+        copy[i] = vector[i];
     return copy;
 }
 
 template<typename T>
-T* linear_transform_array(T* array, long long length, T scale, T step) {
+T* linear_transform_vector(T* vector, long long length, T scale, T step) {
 #pragma omp parallel for
     for (int i = 0; i < length; ++i)
-        array[i] = scale * array[i] + step;
-    return array;
+        vector[i] = scale * vector[i] + step;
+    return vector;
 }
 
 template<typename T>
@@ -68,6 +79,17 @@ T** init_matrix(T** matrix, long long dims[], T& value) {
     for (int i = 0; i < d1; ++i)
         for (int j = 0; j < d2; ++j)
             matrix[i][j] = value;
+    return matrix;
+}
+
+template<typename T>
+T** init_matrix(long long dims[], T* vector) {
+    long long d1 = dims[0], d2 = dims[1];
+    T ** matrix = new T*[d1];
+#pragma omp parallel for
+    for (int i = 0; i < d1; ++i){
+        matrix[i] = copy_vector(vector, d2);
+    }
     return matrix;
 }
 
@@ -159,6 +181,45 @@ void destroy_matrix(T** m, long long dims[]) {
     for (int i = 0; i < d1; ++i)
         delete [] m[i];
     delete [] m;
+}
+
+// This would need to be done with pthreads I suppose.
+// template<typename P>
+// void async(P program) {
+//     throw "Unsupported";
+// }
+
+template<typename T>
+void inline swap_elems(T** m, long long i, long long j) {
+    T tmp = m[i][j];
+    m[i][j] = m[j][i];
+    m[j][i] = tmp;
+}
+
+template<typename T>
+T** transpose_matrix(T** m, long long dims[]) {
+    long long d1 = dims[0], d2 = dims[1];
+    if (d1 == d2) {
+        T** transposed = init_matrix(dims, m[0][0]);
+
+        #pragma omp parallel for collapse(2)
+        for (long long i = 0; i < d1; ++i)
+            for (long long j = 0; j < d2; ++j)
+                transposed[i][j] = m[j][i];
+        return transposed;
+    } else { // not a square matrix
+        // TODO
+        return m;
+    }
+}
+
+template<typename T>
+void transpose_matrix_in_place(T** m, long long dim) {
+    #pragma omp parallel for schedule(guided)
+    for (long long i = 0; i < dim-1; ++i)
+        #pragma omp parallel for firstprivate(i)
+        for (long long j = i; j < dim; ++j)
+            swap_elems(m, i, j);
 }
 
 template<typename P1, typename P2>
