@@ -234,4 +234,21 @@ void fork(P1 program1, P2 program2) {
     }
 }
 
+///////////////////////////////
+// Structured parallel patterns by McCool et al (Intel)
+
+/**
+   Doesn't check whether indices overflow the vector length. */
+template<typename P, typename T, typename R>
+T* expand_vector(T* vector, long long * indices, long long ind_n, R* values, P ex_function) {
+    T* exp_vector = (T*) malloc(sizeof(T)*ind_n);
+
+    #pragma omp parallel for
+    for (long long i = 0; i < ind_n; ++i) {
+        exp_vector[i] = ex_function(vector[indices[i]], values[i]);
+    }
+    return exp_vector;
+}
+
+
 #endif

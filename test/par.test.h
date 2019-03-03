@@ -100,4 +100,61 @@ public:
 
         delete [] v;
     }
+
+    void testFork() {
+        double a = 0, b = 0;
+
+        fork([&](){
+                a = 2.0;
+            }, [&](){
+                b = 3.0;
+            });
+
+        TS_ASSERT_EQUALS(a, 2.0);
+        TS_ASSERT_EQUALS(b, 3.0);
+    }
+
+    // void testForkPar() {
+    //     fork([&](){
+    //             printf("Thrd#: %d\n", omp_get_thread_num());
+    //         }, [&](){
+    //             printf("Thrd#: %d\n", omp_get_thread_num());
+    //         });
+    // }
+
+    void testExpand() {
+        int * v = init_vector(100, 7);
+        long long int ind[] =  {0, 0, 0, 3, 3, 4, 4, 8, 30, 40, 40, 41, 68, 90, 99, 99, 99};
+        int * vals = init_vector(17, 2);
+        // printf("v: %d, %d, %d\n", v[0], v[4], v[99]);
+        // printf("ind: %lld, %lld, %lld\n", ind[0], ind[8], ind[16]);
+        // printf("vals: %d, %d, %d\n", vals[0], vals[8], vals[16]);
+        int * ex = expand_vector(v, ind, 17, vals, [] (int a, int b) {
+                return a * b;
+            });
+
+        for (int i = 0; i < 17; ++i) {
+            TS_ASSERT_EQUALS(ex[i], 14);
+        }
+        delete [] v;
+        delete [] ex;
+    }
+
+    void testExpand2() {
+        int * v = init_vector(100, 7);
+        long long int ind[] =  {0, 0, 0, 3, 3, 4, 4, 8};
+        int vals[] = {1, 2, 3, 4, 5, 6, 7, 8};
+        // printf("v: %d, %d, %d\n", v[0], v[4], v[99]);
+        // printf("ind: %lld, %lld, %lld\n", ind[0], ind[8], ind[16]);
+        // printf("vals: %d, %d, %d\n", vals[0], vals[8], vals[16]);
+        int * ex = expand_vector(v, ind, 8, vals, [] (int a, int b) {
+                return a + b;
+            });
+
+        for (int i = 0; i < 8; ++i) {
+            TS_ASSERT_EQUALS(ex[i], 7 + (i + 1));
+        }
+        delete [] v;
+        delete [] ex;
+    }
 };

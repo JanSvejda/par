@@ -16,3 +16,8 @@ This will install two things on your system: `/usr/local/lib/libpar.a` and `/usr
 After you have installed the library, you can include it in your C++ project (`#include <par.h>`).
 To take advantage of multithreading you will need to compile your program with OpenMP (for `g++`
 you do that by simply adding the `-fopenmp` flag).
+
+
+# To do
+- make reduction efficient with tree-like combining
+- implement Structured parallel patterns
