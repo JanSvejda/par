@@ -1,0 +1,2 @@
+add_executable(examples ParallelFunctions.cpp)
+target_link_libraries(examples par)

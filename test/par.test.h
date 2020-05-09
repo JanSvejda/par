@@ -1,10 +1,11 @@
-#include <par.h>
+#include <par.hpp>
 #include <iostream>
 #include <cxxtest/TestSuite.h>
 #include <omp.h>
 #include <string>
 
 using namespace std;
+using namespace par;
 
 class ParVectorTests : public CxxTest::TestSuite
 {
@@ -13,6 +14,8 @@ public:
         TS_ASSERT( 1 + 1 > 1 );
         TS_ASSERT_EQUALS( 1 + 1, 2 );
         double * a = init_vector(1000, 10.0);
+        TS_ASSERT(a[0] == 10.0);
+        TS_ASSERT(a[999] == 10.0);
         delete [] a;
     }
 
